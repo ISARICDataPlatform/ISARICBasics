@@ -41,6 +41,8 @@ usethis::use_package("tibble")
 usethis::use_package("dplyr")
 usethis::use_package("ggplot2")
 usethis::use_package("purrr")
+usethis::use_package("tictoc")
+usethis::use_package("vroom")
 usethis::use_pipe(export = TRUE)
 
 # Add roxygen2 with markdown for documentation

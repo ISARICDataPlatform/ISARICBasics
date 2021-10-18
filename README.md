@@ -19,7 +19,18 @@ This package is under the very early stages of initial development.
 You can install the current version of iddoBasics with:
 
 ``` r
-devtools::install_github("")
+devtools::install_github("ISARICDataPlatform/iddoBasics")
+```
+
+## Building the SQLite database
+
+The database requires no installation outside of R packages, and is built from
+the csv files provided by ISARIC. See the help file for the function
+`build_sqlite` for instructions on how to build the SQLite database.
+
+```
+library(iddoBasics)
+?build_sqlite
 ```
 
 ## Example
