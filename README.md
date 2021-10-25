@@ -29,7 +29,7 @@ the csv files provided by ISARIC. See the help file for the function
 `build_sqlite` for instructions on how to build the SQLite database.
 
 ```
-library(iddoBasics)
+library(ISARICBasics)
 ?build_sqlite
 ```
 
@@ -38,7 +38,7 @@ library(iddoBasics)
 This is a basic example which shows you how to solve a common problem:
 
 ``` r
-library(iddoBasics)
+library(ISARICBasics)
 ## basic example code
 ```
 
