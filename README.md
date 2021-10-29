@@ -97,7 +97,7 @@ help file by executing the code:
 
 ## Optional: browsing the database with DB Browser
 
-One advantage of having the SQLite database is that browsing large tables is 
+One advantage of having the SQLite database, is that browsing large tables is 
 easier and faster than it would be through, e.g., Excel. To browse the database,
 you can install [DB Browser for SQLite](https://sqlitebrowser.org/). Once 
 DB Browser is installed, you can open the SQLite database in DB Browser by 
@@ -106,12 +106,57 @@ the SQLite database file will be located in the same folder as the ISARIC CSV
 files, and will have the name `db.sqlite`. DB Browser is quite powerful. Here
 is a [beginner friendly tutorial](https://towardsdatascience.com/an-easy-way-to-get-started-with-databases-on-your-own-computer-46f01709561).
 
+## Browsing the database with R
+
+Now the SQLite database is built, it does not have to be built again. 
+Each time you use it with R, you can connect to it with:
+
+```r
+con <- DBI::dbConnect(RSQLite::SQLite(), DIRS$db)
+```
+
+The object `con` represents a connection to the whole database. We can
+find out what tables are available:
+
+```r
+DBI::dbListTables(con)
+
+#> [1] "DM" "DS" "IN" "LB" "SA" "VS"
+```
+
+To connect to just the LB table, we use `con` as follows:
+
+```r
+lb <- dplyr::tbl(con, "LB")
+```
+
+Now, `lb` can be treated much like a `data.frame`. We can easily print the 
+first 10 rows, and some other information (in this tutorial, we cannot display 
+example output, for data security reasons):
+
+```r
+print(lb)
+```
+
+To view just the column names of `lb`:
+
+```
+colnames(lb)
+
+#>  [1] "STUDYID"  "DOMAIN"   "USUBJID"  "LBSEQ"   
+#>  [5] "LBTESTCD" "LBTEST"   "LBCAT"    "LBSCAT"  
+#>  [9] "LBORRES"  "LBORRESU" "LBSTRESC" "LBSTRESN"
+#> [13] "LBSTRESU" "LBSTAT"   "LBREASND" "LBSPEC"  
+#> [17] "LBMETHOD" "LBDY"     "LBEVINTX"
+```
+
+
+
 ## Example
 
 This is a basic example which shows you how to solve a common problem:
 
 ```r
-library(ISARICBasics)
 ## basic example code
 ```
 

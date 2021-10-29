@@ -70,11 +70,15 @@ ISARICBasics::build_sqlite(
 
 con <- DBI::dbConnect(RSQLite::SQLite(), DIRS$db)
 
+DBI::dbListTables(con)
+
 lb <- dplyr::tbl(con, "LB")
 
-
+print(lb)
+colnames(lb)
 
 DBI::dbDisconnect(con)
+
 
 
 
