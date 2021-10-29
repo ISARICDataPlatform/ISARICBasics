@@ -27,7 +27,7 @@
 #'
 #' @examples
 #'
-#' build_sqlite(csv_folder="C:\\Datasets\\AKI\\data\\raw\\07APR2021\\csvs")
+#' build_sqlite(csv_folder=DIRS$data)
 #'
 #' @export
 #' @md

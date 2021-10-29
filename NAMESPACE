@@ -2,4 +2,5 @@
 
 export("%>%")
 export(build_sqlite)
+export(process_occur)
 importFrom(magrittr,"%>%")

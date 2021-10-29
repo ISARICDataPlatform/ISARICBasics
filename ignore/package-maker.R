@@ -78,7 +78,6 @@ print(lb)
 colnames(lb)
 
 
-
 ds <- dplyr::tbl(con, "DS")
 ds_all <- ds %>% dplyr::collect()
 
@@ -95,6 +94,30 @@ lb_creat %>%
 
 lb_creat
 
+
+sa <- dplyr::tbl(con, "SA")
+ho <- dplyr::tbl(con, "HO")
+
+colnames(sa)
+colnames(ho)
+
+sa %>%
+  dplyr::group_by(SAOCCUR, SAPRESP) %>%
+  dplyr::summarise(n=n()) %>%
+  dplyr::collect()
+
+ho %>%
+  dplyr::group_by(HOOCCUR, HOPRESP) %>%
+  dplyr::summarise(n=n()) %>%
+  dplyr::collect()
+
+ho_modified <- ho %>%
+  process_occur(xxOCCUR = HOOCCUR, xxPRESP = HOPRESP)
+
+ho_modified %>%
+  dplyr::group_by(HOOCCUR, HOPRESP, status) %>%
+  dplyr::summarise(n=n()) %>%
+  dplyr::collect()
 
 DBI::dbDisconnect(con)
 

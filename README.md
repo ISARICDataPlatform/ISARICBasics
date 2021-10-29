@@ -210,8 +210,8 @@ all those cases into R memory, we can use `dplyr::collect()` again:
 lb_creat_all <- lb_creat %>% dplyr::collect()
 ```
 
-Now the table is in R memory, we can looking at its dimensions, and
-see that we have 403,509 rows, and 19 columns:
+Now the full table has been loaded in R memory, as `data.frame`. We can, 
+for example, look at its dimensions. 
 
 ```r
 dim(lb_creat_all)
@@ -219,11 +219,12 @@ dim(lb_creat_all)
 #> [1] 403509     19
 ```
 
-Whether we work with the table in memory (with `lb_creat_all`), or we work 
-with the connection to the table (with `lb_creat`), the `dplyr` package 
-opens many ways for us to summarise the information in the table. For example,
-we can find out how many different units have been used, and how many times,
-for reporting on CREAT tests:
+Above, see that we have 403,509 rows, and 19 columns, pertaining to `"CREAT"`
+records in the LB table.
+
+The `dplyr` package provides many other ways for us to summarise and retrieve 
+information. For example, we can find out how many different units have 
+been used, and how many times, for reporting on CREAT tests:
 
 ```r
 lb_creat %>%
@@ -248,15 +249,124 @@ lb_creat %>%
 #> 12 umol/L   314303
 ```
 
-Above, we have grouped the rows of `lb_creat` by the contents of the `LBORRESU`
+Above, we have grouped the rows of `lb_creat`, by the contents of the `LBORRESU`
 column, and then we have summarised the result, asking for a tally of the
 number of rows in each group, with `dplyr::summarise(n=n())`.
 
 There are many more tools available in `dplyr`, and many are discussed 
 clearly [in the documentation](https://dplyr.tidyverse.org/).
 
-## The ISARICBasics processing
+## ISARICBasics processing functions
 
+ISARIC data are stored in an [SDTM](https://en.wikipedia.org/wiki/SDTM) format
+and collected from the [ISARIC Case Report Forms (CRF)](https://isaric.org/research/covid-19-clinical-research-resources/covid-19-crf/).
 
+ISARICBasics processing functions are designed to transform some of the more 
+complicated encodings for ISARIC data, to simpler formats.
 
+To start, we will work with the SA and HO tables, to categorise events 
+according to whether they occurred ('yes'), did not occur ('no'), or have an
+unknown status ('unknown') at each point in time.
 
+```r
+sa <- dplyr::tbl(con, "SA")
+ho <- dplyr::tbl(con, "HO")
+
+colnames(sa)
+
+#>  [1] "STUDYID"  "DOMAIN"   "USUBJID"  "SASEQ"    "SATERM"  
+#>  [6] "SAMODIFY" "SACAT"    "SASCAT"   "SAPRESP"  "SAOCCUR" 
+#> [11] "SASTAT"   "SAREASND" "SADY"     "SASTDY"   "SAENDY"  
+#> [16] "SADUR"    "SASTRF"   "SAEVLINT" "SAEVINTX"
+
+colnames(ho)
+
+#>  [1] "STUDYID"  "DOMAIN"   "USUBJID"  "HOSEQ"    "HOTERM"  
+#>  [6] "HODECOD"  "HOPRESP"  "HOOCCUR"  "HOSTAT"   "HOREASND"
+#> [11] "HODY"     "HOSTDY"   "HOENDY"   "HODUR"    "HOSTRF"  
+#> [16] "HOEVINTX" "HODISOUT" "SELFCARE" "HOINDC"  
+```
+We can see above that SA and HO have many similar column names, 
+when the prefix `xx` is ignored. In particular, they both have:
+
+* `xxTERM`: the verbatim wording of the event (non-standardised).
+* `xxOCCUR`: helps indicate whether an event occurred.
+* `xxPRESP`: 'y' indicates the observation was pre-specified on the CRF, while missing or 'N' indicates spontaneous reports.
+* `xxSTDY`: the day of the event, relative to admission.
+
+Rather than work with the verbatim wording of an event (`xxTERM`), which is
+highly variable, we can work with the standardised versions, e.g.,
+`HODECOD` or `SAMODIFY`.
+
+To understand `xxOCCUR` and `xxPRESP` better, we can find out how many combinations
+of these appear in each table, and how many times each combination occurs:
+
+```r
+sa %>%
+  dplyr::group_by(SAOCCUR, SAPRESP) %>%
+  dplyr::summarise(n=n()) %>%
+  dplyr::collect()
+  
+#> # A tibble: 5 x 3
+#> # Groups:   SAOCCUR [4]
+#>   SAOCCUR SAPRESP        n
+#>   <chr>   <chr>      <int>
+#> 1 NA      NA        250815
+#> 2 NA      Y          43496
+#> 3 N       Y       17334310
+#> 4 U       Y        5388019
+#> 5 Y       Y        2426457
+
+ho %>%
+  dplyr::group_by(HOOCCUR, HOPRESP) %>%
+  dplyr::summarise(n=n()) %>%
+  dplyr::collect()
+  
+#> # A tibble: 6 x 3
+#> # Groups:   HOOCCUR [4]
+#>   HOOCCUR HOPRESP      n
+#>   <chr>   <chr>    <int>
+#> 1 NA      NA      218769
+#> 2 NA      Y         1000
+#> 3 N       Y       651063
+#> 4 U       Y         6331
+#> 5 Y       NA         577
+#> 6 Y       Y       468717
+```
+We can see, for example, that in the HO table, the value `HOOCCUR = 'Y'`
+appeared beside the value `HOPRESP = NA`, a total of 577 times. 
+
+The function `ISARICBasics::process_occur` will process each possible combination
+of `xxOCCUR` and `xxPRESP` into one column, called `status`, which takes values
+'yes' (occurred), 'no' (did not occur), or 'unknown' (unknown status):
+
+```r
+ho_modified <- ho %>%
+  ISARICBasics::process_occur(xxOCCUR = HOOCCUR, xxPRESP = HOPRESP)
+```
+
+We can now summarise the results to see how the new column named `status` 
+compares to `HOOCCUR` and `HOPRESP`:
+
+```r
+ho_modified %>%
+  dplyr::group_by(HOOCCUR, HOPRESP, status) %>%
+  dplyr::summarise(n=n()) %>%
+  dplyr::collect()
+  
+#> # A tibble: 6 x 4
+#> # Groups:   HOOCCUR, HOPRESP [6]
+#>   HOOCCUR HOPRESP status       n
+#>   <chr>   <chr>   <chr>    <int>
+#> 1 NA      NA      yes     218769
+#> 2 NA      Y       unknown   1000
+#> 3 N       Y       no      651063
+#> 4 U       Y       unknown   6331
+#> 5 Y       NA      yes        577
+#> 6 Y       Y       yes     468717
+```
+
+Note that the `status` column added by `ISARICBasics::process_occur` is 
+lowercase, while the other columns are uppercase. This is a good convention 
+to keep track of which columns are from the original ISARIC data (uppercase) and which 
+columns are derived (lowercase). 
