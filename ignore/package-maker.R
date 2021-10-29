@@ -77,9 +77,26 @@ lb <- dplyr::tbl(con, "LB")
 print(lb)
 colnames(lb)
 
+
+
+ds <- dplyr::tbl(con, "DS")
+ds_all <- ds %>% dplyr::collect()
+
+lb_creat <- lb %>% dplyr::filter(LBTESTCD == "CREAT")
+
+lb_creat_all <- lb_creat %>% dplyr::collect()
+dim(lb_creat_all)
+
+
+lb_creat %>%
+  dplyr::group_by(LBORRESU) %>%
+  dplyr::summarise(n=n()) %>%
+  dplyr::collect()
+
+lb_creat
+
+
 DBI::dbDisconnect(con)
-
-
 
 
 

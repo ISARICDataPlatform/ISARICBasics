@@ -131,16 +131,41 @@ lb <- dplyr::tbl(con, "LB")
 ```
 
 Now, `lb` can be treated much like a `data.frame`. We can easily print the 
-first 10 rows, and some other information (in this tutorial, we cannot display 
-example output, for data security reasons):
+first 10 rows of the LB table, and some other information:
 
 ```r
 print(lb)
+
+#> # Source:   table<LB> [?? x 19]
+#> # Database: sqlite 3.35.4
+#> #   [C:\my\path\07APR2021\csvs\db.sqlite]
+#>    STUDYID DOMAIN USUBJID   LBSEQ LBTESTCD LBTEST    LBCAT
+#>    <chr>   <chr>  <chr>     <dbl> <chr>    <chr>     <chr>
+#>  1 CVMEWUS LB     CVMEWUS_~     1 HGB      Hemoglob~ NA   
+#>  2 CVMEWUS LB     CVMEWUS_~     2 MCH      Ery. Mea~ NA   
+#>  3 CVMEWUS LB     CVMEWUS_~     3 PLAT     Platelets NA   
+#>  4 CVMEWUS LB     CVMEWUS_~     4 RBC      Erythroc~ NA   
+#>  5 CVMEWUS LB     CVMEWUS_~     5 RDW      Erythroc~ NA   
+#>  6 CVMEWUS LB     CVMEWUS_~     6 WBC      Leukocyt~ NA   
+#>  7 CVMEWUS LB     CVMEWUS_~     7 IRON     Iron      NA   
+#>  8 CVMEWUS LB     CVMEWUS_~     8 K        Potassium NA   
+#>  9 CVMEWUS LB     CVMEWUS_~     9 LDH      Lactate ~ NA   
+#> 10 CVMEWUS LB     CVMEWUS_~    10 LYM      Lymphocy~ NA   
+#> # ... with more rows, and 12 more variables:
+#> #   LBSCAT <int>, LBORRES <chr>, LBORRESU <chr>,
+#> #   LBSTRESC <chr>, LBSTRESN <dbl>, LBSTRESU <chr>,
+#> #   LBSTAT <chr>, LBREASND <chr>, LBSPEC <chr>,
+#> #   LBMETHOD <int>, LBDY <dbl>, LBEVINTX <chr>
 ```
 
-To view just the column names of `lb`:
+Notice, at the top of the above output, the sentence `Source: table<LB> [?? x 19]`.
+The `??` indicates that we do not know how many rows the LB table has. This is
+because the LB table hasn't been fully loaded into R memory. We are just connected
+to the table, which still resides in the SQLite database.
 
-```
+To view just the column names of the `LB` table:
+
+```r
 colnames(lb)
 
 #>  [1] "STUDYID"  "DOMAIN"   "USUBJID"  "LBSEQ"   
@@ -150,13 +175,91 @@ colnames(lb)
 #> [17] "LBMETHOD" "LBDY"     "LBEVINTX"
 ```
 
+## A note on the pipe operator
 
+From now on, we will start using the pipe operator `%>%`. If you are
+unfamiliar with this handy tool, [here is a tutorial](https://towardsdatascience.com/an-introduction-to-the-pipe-in-r-823090760d64). 
 
-## Example
+## Working with large SQL data in R
 
-This is a basic example which shows you how to solve a common problem:
+For a small table, such as DS, we can comfortably load the whole table into R,
+using `dplyr::collect()`:
 
 ```r
-## basic example code
+ds <- dplyr::tbl(con, "DS")
+ds_all <- ds %>% collect()
 ```
+
+However, the LB table is very large. Loading the whole table into R may be unnecessary
+and slow. The [R package dbplyr](https://dbplyr.tidyverse.org/) is installed
+automatically with `ISARICBasics`, and is useful for working with large SQL tables.
+With `dbplyr` installed, we can use many functions from the more well known
+[R package, dplyr](https://dplyr.tidyverse.org/), on our SQL table connections.
+
+A common operation is to filter the data, to retrieve only rows matching some
+condition. For example, we can filter the LB table, using our `lb` connection,
+to only connect to rows that have the value `"CREAT"` entered in the 
+column LBTESTCD:
+
+```r
+lb_creat <- lb %>% dplyr::filter(LBTESTCD == "CREAT")
+```
+
+The object `lb_creat` is now a connection, just like `lb`, but it is aware that
+we only want to look at cases where `LBTESTCD == "CREAT"`. If we want to load 
+all those cases into R memory, we can use `dplyr::collect()` again:
+
+```r
+lb_creat_all <- lb_creat %>% dplyr::collect()
+```
+
+Now the table is in R memory, we can looking at its dimensions, and
+see that we have 403,509 rows, and 19 columns:
+
+```r
+dim(lb_creat_all)
+
+#> [1] 403509     19
+```
+
+Whether we work with the table in memory (with `lb_creat_all`), or we work 
+with the connection to the table (with `lb_creat`), the `dplyr` package 
+opens many ways for us to summarise the information in the table. For example,
+we can find out how many different units have been used, and how many times,
+for reporting on CREAT tests:
+
+```r
+lb_creat %>%
+  dplyr::group_by(LBORRESU) %>%
+  dplyr::summarise(n=n()) %>%
+  dplyr::collect()
+  
+#> # A tibble: 12 x 2
+#>    LBORRESU      n
+#>    <chr>     <int>
+#>  1 NA         4561
+#>  2 0.9           1
+#>  3 MG/L          1
+#>  4 MMOL/L        1
+#>  5 U/L           2
+#>  6 mg/L          9
+#>  7 mg/dL     83307
+#>  8 mg/dL'        1
+#>  9 mmol/L      424
+#> 10 mol          21
+#> 11 umol        878
+#> 12 umol/L   314303
+```
+
+Above, we have grouped the rows of `lb_creat` by the contents of the `LBORRESU`
+column, and then we have summarised the result, asking for a tally of the
+number of rows in each group, with `dplyr::summarise(n=n())`.
+
+There are many more tools available in `dplyr`, and many are discussed 
+clearly [in the documentation](https://dplyr.tidyverse.org/).
+
+## Working with ISARICBasics cleaning functions
+
+
+
 
