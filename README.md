@@ -8,11 +8,8 @@ This package is under the very early stages of initial development.
 
 ## This package offers
 
-* Simple functions focused on clarifying and advising on a few best practices, including:
-  * Cleaning basics for time series by days and sequence
-* Determining if an event occurred (yes, no, unknown)
-* SQLite database creation and basic usage
-* Documentation and data dictionary
+* SQLite database creation and a tutorial (below) on basic usage 
+* Some built in processing functions for ISARIC data
 
 # Tutorial
 
@@ -258,7 +255,7 @@ number of rows in each group, with `dplyr::summarise(n=n())`.
 There are many more tools available in `dplyr`, and many are discussed 
 clearly [in the documentation](https://dplyr.tidyverse.org/).
 
-## Working with ISARICBasics cleaning functions
+## The ISARICBasics processing
 
 
 
