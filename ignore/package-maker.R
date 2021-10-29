@@ -73,6 +73,7 @@ con <- DBI::dbConnect(RSQLite::SQLite(), DIRS$db)
 lb <- dplyr::tbl(con, "LB")
 
 
+
 DBI::dbDisconnect(con)
 
 

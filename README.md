@@ -87,6 +87,13 @@ been built, no existing tables will be overwritten. Setting `overwrite=TRUE`
 will cause every table in the database to be overwritten. However, note that the
 ISARIC CSV files will never be changed or overwritten.
 
+If you want more help on the `build_sqlite` function, you can open the
+help file by executing the code:
+
+```
+?ISARICBasics::build_sqlite
+```
+
 ## Optional: browsing the database with DB Browser
 
 One advantage of having the SQLite database is that browsing large tables is 
@@ -95,7 +102,8 @@ you can install [DB Browser for SQLite](https://sqlitebrowser.org/). Once
 DB Browser is installed, you can open the SQLite database in DB Browser by 
 clicking on the database file. If you have followed this tutorial until now,
 the SQLite database file will be located in the same folder as the ISARIC CSV
-files, and will have the name `db.sqlite`.
+files, and will have the name `db.sqlite`. DB Browser is quite powerful. Here
+is a [beginner friendly tutorial](https://towardsdatascience.com/an-easy-way-to-get-started-with-databases-on-your-own-computer-46f01709561).
 
 ## Example
 
