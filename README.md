@@ -14,24 +14,88 @@ This package is under the very early stages of initial development.
 * SQLite database creation and basic usage
 * Documentation and data dictionary
 
+# Tutorial
+
+During this tutorial, we'll use the convention of appending `packagename::` to
+every function that is not already in base R. This makes it easy to keep track
+of which R package each function comes from. So, for example, instead of 
+writing `install_github()` (a function from the `devtools` package), we will
+write `devtools::install_github()`.
+
+## Setting directories
+
+For this tutorial, it will be handy to have file paths prepared.
+
+We first create an empty list called `DIRS`, which will store all of the file
+paths.
+
+```
+DIRS <- list()
+```
+
+Now set the location of the ISARIC data CSV files:
+
+```
+DIRS$data <- "C:/my/path/07APR2021/csvs"
+```
+
+We also need somewhere to store the SQLite database we'll be making, and a name 
+for the database file. The following will set the database location to the 
+same directory as the CSVs, and give it the name `"db.sqlite"`:
+
+```
+DIRS$db_filename <- "db.sqlite"
+DIRS$db <- file.path(DIRS$data, DIRS$db_filename)
+```
+
 ## Installation
 
-You can install the current version of iddoBasics with:
+Start by installing the `devtools` package:
+
+```
+install.packages("devtools")
+```
+
+You can now install the current version of ISARICBasics with:
 
 ``` r
-devtools::install_github("ISARICDataPlatform/iddoBasics")
+devtools::install_github("ISARICDataPlatform/ISARICBasics")
+```
+
+Then, load the `ISARICBasics` package:
+
+```
+library(ISARICBasics)
 ```
 
 ## Building the SQLite database
 
-The database requires no installation outside of R packages, and is built from
-the csv files provided by ISARIC. See the help file for the function
-`build_sqlite` for instructions on how to build the SQLite database.
+The database requires no additional installation, and is built from
+the CSV files provided by ISARIC. Assuming you have set `DIRS`, as above,
+you can build the SQLite database with:
 
 ```
-library(ISARICBasics)
-?build_sqlite
+ISARICBasics::build_sqlite(
+  csv_folder=DIRS$data,
+  sql_folder=DIRS$db,
+  sql_filename=DIRS$db_filename,
+  overwrite=FALSE)
 ```
+
+The setting `overwrite=FALSE` makes sure that, if the SQLite database has already
+been built, no existing tables will be overwritten. Setting `overwrite=TRUE` 
+will cause every table in the database to be overwritten. However, note that the
+ISARIC CSV files will never be changed or overwritten.
+
+## Optional: browsing the database with DB Browser
+
+One advantage of having the SQLite database is that browsing large tables is 
+easier and faster than it would be through, e.g., Excel. To browse the database,
+you can install [DB Browser for SQLite](https://sqlitebrowser.org/). Once 
+DB Browser is installed, you can open the SQLite database in DB Browser by 
+clicking on the database file. If you have followed this tutorial until now,
+the SQLite database file will be located in the same folder as the ISARIC CSV
+files, and will have the name `db.sqlite`.
 
 ## Example
 

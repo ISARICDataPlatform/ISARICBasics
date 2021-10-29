@@ -57,7 +57,7 @@ build_sqlite <- function(csv_folder, sql_folder=csv_folder,
   if (!overwrite) {
     exist_tables <- DBI::dbListTables(con)
     exists <- table_names %in% exist_tables
-    if (all(exists)) return(FALSE)
+    if (all(exists)) DBI::dbDisconnect(con); return(FALSE)
     table_names <- table_names[!exists]
     csv_filenames <- csv_filenames[!exists]
   }
@@ -79,3 +79,4 @@ build_sqlite <- function(csv_folder, sql_folder=csv_folder,
 
   return(TRUE)
 }
+

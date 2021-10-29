@@ -53,3 +53,28 @@ usethis::use_lifecycle_badge("experimental")
 
 # Use testthat for testing workflow
 usethis::use_testthat()
+
+
+# Example code and testing ------------------------------------------------
+
+DIRS <- list()
+DIRS$data <- "C:/Datasets/AKI/data/raw/07APR2021/csvs"
+DIRS$db_filename <- "db.sqlite"
+DIRS$db <- file.path(DIRS$data, DIRS$db_filename)
+
+ISARICBasics::build_sqlite(
+  csv_folder=DIRS$data,
+  sql_folder=DIRS$db,
+  sql_filename=DIRS$db_filename,
+  overwrite=F)
+
+con <- DBI::dbConnect(RSQLite::SQLite(), DIRS$db)
+
+lb <- dplyr::tbl(con, "LB")
+
+
+DBI::dbDisconnect(con)
+
+
+
+
