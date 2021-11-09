@@ -184,7 +184,7 @@ using `dplyr::collect()`:
 
 ```r
 ds <- dplyr::tbl(con, "DS")
-ds_all <- ds %>% collect()
+ds_all <- ds %>% dplyr::collect()
 ```
 
 However, the LB table is very large. Loading the whole table into R may be unnecessary

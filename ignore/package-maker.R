@@ -54,7 +54,6 @@ usethis::use_lifecycle_badge("experimental")
 # Use testthat for testing workflow
 usethis::use_testthat()
 
-
 # Example code and testing ------------------------------------------------
 
 DIRS <- list()
