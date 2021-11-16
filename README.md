@@ -43,7 +43,7 @@ same directory as the CSVs, and give it the name `"db.sqlite"`:
 
 ```r
 DIRS$db_filename <- "db.sqlite"
-DIRS$db <- file.path(DIRS$data, DIRS$db_filename)
+DIRS$db <- DIRS$data
 ```
 
 ## Installation
