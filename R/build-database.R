@@ -52,7 +52,9 @@ build_sqlite <- function(csv_folder, sql_folder=csv_folder,
   }
 
   # Open database connection
-  con <- DBI::dbConnect(RSQLite::SQLite(), paste0(sql_folder,"/", sql_filename))
+  con <- DBI::dbConnect(
+    RSQLite::SQLite(),
+    file.path(sql_folder, sql_filename))
 
   if (!overwrite) {
     exist_tables <- DBI::dbListTables(con)
