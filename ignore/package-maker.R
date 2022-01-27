@@ -57,7 +57,7 @@ usethis::use_testthat()
 # Example code and testing ------------------------------------------------
 
 DIRS <- list()
-DIRS$data <- "C:/Datasets/AKI/data/raw/07APR2021/csvs"
+DIRS$data <- "G:/Datasets/AKI/data/raw/07APR2021/csvs"
 DIRS$db_filename <- "db.sqlite"
 DIRS$db <- file.path(DIRS$data, DIRS$db_filename)
 
@@ -93,6 +93,12 @@ lb_creat %>%
 
 lb_creat
 
+lb %>%
+  dplyr::group_by(LBTESTCD) %>%
+  dplyr::summarise(n=sum(is.na(LBORRESU), na.rm=T)) %>%
+  dplyr::collect()
+
+lb %>% dplyr::filter(LBTEST %like% "%platelets%")
 
 sa <- dplyr::tbl(con, "SA")
 ho <- dplyr::tbl(con, "HO")

@@ -251,7 +251,40 @@ lb_creat %>%
 
 Above, we have grouped the rows of `lb_creat`, by the contents of the `LBORRESU`
 column, and then we have summarised the result, asking for a tally of the
-number of rows in each group, with `dplyr::summarise(n=n())`.
+number of rows in each group, with `dplyr::summarise(n=n())`. Grouping and 
+summarising are powerful tools. For example, we can find the proportion of
+missing units (LBORRESU) for each type of lab test (LBTESTCD):
+
+```r
+lb %>%
+  dplyr::group_by(LBTESTCD) %>%
+  dplyr::summarise(n=sum(is.na(LBORRESU), na.rm=T)) %>%
+  dplyr::collect()
+  
+#> # A tibble: 78 x 2
+#>    LBTESTCD     n
+#>    <chr>    <int>
+#>  1 ALB          0
+#>  2 ALP       2639
+#>  3 ALT      12246
+#>  4 AMYLASE      0
+#>  5 APTT      3288
+#>  6 APTTSTND 10396
+#>  7 AST      10202
+#>  8 BASEEXCS    38
+#>  9 BASO         0
+#> 10 BASOLE       0
+#> # ... with 68 more rows
+```
+
+The `dplyr::filter` function is also powerful. For example, we can use it to
+do free text searches with the `%like%` operator. 
+Here, we search for all LBTEST entries containing the 
+word "platelets":
+
+```r
+lb %>% dplyr::filter(LBTEST %like% "%platelets%")
+```
 
 There are many more tools available in `dplyr`, and many are discussed 
 clearly [in the documentation](https://dplyr.tidyverse.org/).
