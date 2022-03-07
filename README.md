@@ -10,6 +10,7 @@ This package is under the very early stages of initial development.
 
 * SQLite database creation and a tutorial (below) on basic usage 
 * Some built in processing functions for ISARIC data
+* There is also a pyISARICBasics package that provides similar functionality for researchers who wish to use Python: (https://github.com/KyleYoung1997/pyISARICBasics)
 
 # Tutorial
 
